@@ -70,7 +70,7 @@ function cors()
  * 
  * @return string[string] The HTTP header key/value pairs.
  */
-function getRequestHeaders()
+function getHeaders()
 {
 	$headers = array();
 
@@ -105,10 +105,34 @@ function getRequestHeaders()
 	return $headers;
 }
 
+
 // enable cors 
 cors();
+header('Content-Type: application/json; charset=utf-8');
+
+$errorObj = (object) [
+  'auth' => "not authorized",
+];
+
+if (!isset($_SERVER [ 'PHP_AUTH_USER'] )) {
+  header("WWW-Authenticate: Basic realm=\"Private Area\"");
+  header("HTTP/1.0 401 Unauthorized");
+  echo json_encode($errorObj);
+  exit;
+} else {
+  if (($_SERVER [ 'PHP_AUTH_USER'] == "username goes here") && ($_SERVER [ 'PHP_AUTH_PW'] == "password goes here"))  {
+    $sucessObj = (object) [
+      'auth' => "authorized",
+      'name' => $_SERVER [ 'PHP_AUTH_USER'],
+			'res' => getHeaders(),
+    ];
+    echo json_encode($sucessObj);
+  } else {
+    header("WWW-Authenticate: Basic realm=\"Private Area\"");
+    header("HTTP/1.0 401 Unauthorized");
+    echo json_encode($errorObj);
+  }
+}
 
 // to json
-header('Content-Type: application/json; charset=utf-8');
-echo json_encode(getRequestHeaders());
 ?>
